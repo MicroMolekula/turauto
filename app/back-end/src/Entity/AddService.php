@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\AddServiceRepository;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: AddServiceRepository::class)]
@@ -22,6 +23,11 @@ class AddService
     #[ORM\JoinColumn(name:"srv_type", referencedColumnName:"srv_type")]
     #[ORM\InverseJoinColumn(name:"car_vin", referencedColumnName:"car_vin")]
     private ?ArrayCollection $cars;
+
+    public function __construct()
+    {
+        $this->cars = new ArrayCollection();
+    }
 
     public function getSrvType(): string
     {
@@ -42,6 +48,30 @@ class AddService
     public function setSrvCost(int $srv_cost): self
     {
         $this->srv_cost = $srv_cost;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Car>
+     */
+    public function getCars(): Collection
+    {
+        return $this->cars;
+    }
+
+    public function addCar(Car $car): static
+    {
+        if (!$this->cars->contains($car)) {
+            $this->cars->add($car);
+        }
+
+        return $this;
+    }
+
+    public function removeCar(Car $car): static
+    {
+        $this->cars->removeElement($car);
+
         return $this;
     }
 }

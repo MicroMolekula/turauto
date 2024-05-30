@@ -157,4 +157,16 @@ class Manager
 
         return $this;
     }
+
+    public function getStationService(): ?StationService
+    {
+        return $this->station_service;
+    }
+
+    public function setStationService(?StationService $station_service): static
+    {
+        $this->station_service = $station_service;
+
+        return $this;
+    }
 }

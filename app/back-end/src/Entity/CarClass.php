@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\CarClassRepository;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -29,6 +30,11 @@ class CarClass
 
     #[ORM\OneToMany(targetEntity:Car::class, mappedBy:"car_class")]
     private ?ArrayCollection $cars;
+
+    public function __construct()
+    {
+        $this->cars = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -84,6 +90,36 @@ class CarClass
     public function setClsMileageLimit(int $cls_mileage_limit): static
     {
         $this->cls_mileage_limit = $cls_mileage_limit;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Car>
+     */
+    public function getCars(): Collection
+    {
+        return $this->cars;
+    }
+
+    public function addCar(Car $car): static
+    {
+        if (!$this->cars->contains($car)) {
+            $this->cars->add($car);
+            $car->setCarClass($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCar(Car $car): static
+    {
+        if ($this->cars->removeElement($car)) {
+            // set the owning side to null (unless already changed)
+            if ($car->getCarClass() === $this) {
+                $car->setCarClass(null);
+            }
+        }
 
         return $this;
     }

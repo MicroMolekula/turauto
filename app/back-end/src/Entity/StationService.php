@@ -41,6 +41,8 @@ class StationService
     public function __construct()
     {
         $this->bookings = new ArrayCollection();
+        $this->cars = new ArrayCollection();
+        $this->managers = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -125,6 +127,66 @@ class StationService
             // set the owning side to null (unless already changed)
             if ($booking->getStationService() === $this) {
                 $booking->setStationService(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Car>
+     */
+    public function getCars(): Collection
+    {
+        return $this->cars;
+    }
+
+    public function addCar(Car $car): static
+    {
+        if (!$this->cars->contains($car)) {
+            $this->cars->add($car);
+            $car->setStationService($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCar(Car $car): static
+    {
+        if ($this->cars->removeElement($car)) {
+            // set the owning side to null (unless already changed)
+            if ($car->getStationService() === $this) {
+                $car->setStationService(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Manager>
+     */
+    public function getManagers(): Collection
+    {
+        return $this->managers;
+    }
+
+    public function addManager(Manager $manager): static
+    {
+        if (!$this->managers->contains($manager)) {
+            $this->managers->add($manager);
+            $manager->setStationService($this);
+        }
+
+        return $this;
+    }
+
+    public function removeManager(Manager $manager): static
+    {
+        if ($this->managers->removeElement($manager)) {
+            // set the owning side to null (unless already changed)
+            if ($manager->getStationService() === $this) {
+                $manager->setStationService(null);
             }
         }
 

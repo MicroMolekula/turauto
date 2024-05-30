@@ -59,6 +59,7 @@ class Car
     public function __construct()
     {
         $this->bookings = new ArrayCollection();
+        $this->add_services = new ArrayCollection();
     }
 
     public function getId(): string
@@ -204,6 +205,57 @@ class Car
             if ($booking->getCar() === $this) {
                 $booking->setCar(null);
             }
+        }
+
+        return $this;
+    }
+
+    public function getStationService(): ?StationService
+    {
+        return $this->station_service;
+    }
+
+    public function setStationService(?StationService $station_service): static
+    {
+        $this->station_service = $station_service;
+
+        return $this;
+    }
+
+    public function getCarClass(): ?CarClass
+    {
+        return $this->car_class;
+    }
+
+    public function setCarClass(?CarClass $car_class): static
+    {
+        $this->car_class = $car_class;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, AddService>
+     */
+    public function getAddServices(): Collection
+    {
+        return $this->add_services;
+    }
+
+    public function addAddService(AddService $addService): static
+    {
+        if (!$this->add_services->contains($addService)) {
+            $this->add_services->add($addService);
+            $addService->addCar($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAddService(AddService $addService): static
+    {
+        if ($this->add_services->removeElement($addService)) {
+            $addService->removeCar($this);
         }
 
         return $this;
