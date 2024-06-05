@@ -1,0 +1,55 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Car index{% endblock %}
+
+{% block body %}
+    <h1>Car index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Car_vin</th>
+                <th>Car_make</th>
+                <th>Car_model</th>
+                <th>Car_date_of_issue</th>
+                <th>Car_state_number</th>
+                <th>Cls_title</th>
+                <th>Stn_id</th>
+                <th>Car_body_type</th>
+                <th>Car_color</th>
+                <th>Car_status</th>
+                <th>Car_gearbox_type</th>
+                <th>Car_img</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for car in cars %}
+            <tr>
+                <td>{{ car.carVin }}</td>
+                <td>{{ car.carMake }}</td>
+                <td>{{ car.carModel }}</td>
+                <td>{{ car.carDateOfIssue ? car.carDateOfIssue|date('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ car.carStateNumber }}</td>
+                <td>{{ car.clsTitle }}</td>
+                <td>{{ car.stnId }}</td>
+                <td>{{ car.carBodyType }}</td>
+                <td>{{ car.carColor }}</td>
+                <td>{{ car.carStatus }}</td>
+                <td>{{ car.carGearboxType }}</td>
+                <td>{{ car.carImg }}</td>
+                <td>
+                    <a href="{{ path('app_car_show', {'car_vin': car.car_vin}) }}">show</a>
+                    <a href="{{ path('app_car_edit', {'car_vin': car.car_vin}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="13">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_car_new') }}">Create new</a>
+{% endblock %}

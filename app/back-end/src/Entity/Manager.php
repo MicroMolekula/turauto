@@ -6,10 +6,11 @@ use App\Repository\ManagerRepository;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: ManagerRepository::class)]
 #[ORM\Table(name:"manager")]
-class Manager
+class Manager implements PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -34,8 +35,11 @@ class Manager
     #[ORM\Column]
     private ?int $stn_id;
 
+    #[ORM\Column(length:16)]
+    private ?string $mng_role;
+
     #[ORM\OneToMany(targetEntity:Booking::class, mappedBy:"manager")]
-    private ?ArrayCollection $bookings;
+    private ?Collection $bookings;
 
     #[ORM\ManyToOne(targetEntity:StationService::class, inversedBy:"managers")]
     #[ORM\JoinColumn(name:"stn_id", referencedColumnName:"stn_id")]
@@ -99,7 +103,7 @@ class Manager
         return $this;
     }
 
-    public function getMngPassword(): ?string
+    public function getPassword(): ?string
     {
         return $this->mng_password;
     }
@@ -168,5 +172,22 @@ class Manager
         $this->station_service = $station_service;
 
         return $this;
+    }
+
+    public function getMngRole(): ?string
+    {
+        return $this->mng_role;
+    }
+
+    public function setMngRole(string $mng_role): static
+    {
+        $this->mng_role = $mng_role;
+
+        return $this;
+    }
+
+    public function getMngPassword(): ?string
+    {
+        return $this->mng_password;
     }
 }

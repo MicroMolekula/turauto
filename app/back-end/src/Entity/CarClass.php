@@ -16,7 +16,7 @@ class CarClass
     #[ORM\Column(length:32)]
     private ?string $cls_title;
 
-    #[ORM\Column(type:"decimal", precision:2)]
+    #[ORM\Column]
     private ?float $cls_coef_cost;
 
     #[ORM\Column(type:"decimal", precision:2)]
@@ -29,7 +29,7 @@ class CarClass
     private ?int $cls_mileage_limit;
 
     #[ORM\OneToMany(targetEntity:Car::class, mappedBy:"car_class")]
-    private ?ArrayCollection $cars;
+    private ?Collection $cars;
 
     public function __construct()
     {
@@ -44,6 +44,12 @@ class CarClass
     public function getClsTitle(): ?string
     {
         return $this->cls_title;
+    }
+
+    public function setClsTitle(string $cls_title): static
+    {
+        $this->cls_title = $cls_title;
+        return $this;
     }
 
     public function getClsCoefCost(): ?string

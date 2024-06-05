@@ -42,8 +42,14 @@ class Car
     #[ORM\Column(name:"car_status", columnDefinition:" INT check (car_status between 0 and 3)")]
     private ?int $car_status;
 
+    #[ORM\Column(length:16)]
+    private ?string $car_gearbox_type;
+
+    #[ORM\Column(length:128)]
+    private ?string $car_img;
+
     #[ORM\OneToMany(targetEntity:Booking::class, mappedBy:"car")]
-    private ?ArrayCollection $bookings;
+    private ?Collection $bookings;
 
     #[ORM\ManyToOne(targetEntity:StationService::class, inversedBy:"cars")]
     #[ORM\JoinColumn(name:"stn_id", referencedColumnName:"stn_id")]
@@ -54,7 +60,7 @@ class Car
     private ?CarClass $car_class;
 
     #[ORM\ManyToMany(targetEntity:AddService::class, mappedBy:"cars")]
-    private ?ArrayCollection $add_services;
+    private ?Collection $add_services;
 
     public function __construct()
     {
@@ -70,6 +76,13 @@ class Car
     public function getCarVin(): ?string
     {
         return $this->car_vin;
+    }
+
+    public function setCarVin(string $car_vin): static
+    {
+        $this->car_vin = $car_vin;
+
+        return $this;
     }
 
     public function getCarMake(): ?string
@@ -257,6 +270,30 @@ class Car
         if ($this->add_services->removeElement($addService)) {
             $addService->removeCar($this);
         }
+
+        return $this;
+    }
+
+    public function getCarImg(): ?string
+    {
+        return $this->car_img;
+    }
+
+    public function setCarImg(string $car_img): static
+    {
+        $this->car_img = $car_img;
+
+        return $this;
+    }
+
+    public function getCarGearboxType(): ?string
+    {
+        return $this->car_gearbox_type;
+    }
+
+    public function setCarGearboxType(string $car_gearbox_type): static
+    {
+        $this->car_gearbox_type = $car_gearbox_type;
 
         return $this;
     }

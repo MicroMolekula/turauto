@@ -30,13 +30,13 @@ class StationService
     private ?\DateTimeInterface $stn_time_end;
 
     #[ORM\OneToMany(targetEntity:Booking::class, mappedBy:"station_service")]
-    private ?ArrayCollection $bookings;
+    private ?Collection $bookings;
 
     #[ORM\OneToMany(targetEntity:Car::class, mappedBy:"station_service")]
-    private ?ArrayCollection $cars;
+    private ?Collection $cars;
 
     #[ORM\OneToMany(targetEntity:Manager::class, mappedBy:"station_service")]
-    private ?ArrayCollection $managers;
+    private ?Collection $managers;
 
     public function __construct()
     {

@@ -9,10 +9,10 @@
 </template>
 
 <script setup>
-import InputDate from '@/components/InputDate.vue';
-import InputStation from '@/components/InputStation.vue';
-import InputCar from '@/components/InputCar.vue';
-import InputSubmit from '@/components/InputSubmit.vue';
+import InputDate from '@/components/inputs/InputDate.vue';
+import InputStation from '@/components/inputs/InputStation.vue';
+import InputCar from '@/components/inputs/InputCar.vue';
+import InputSubmit from '@/components/inputs/InputSubmit.vue';
 </script>
 
 <style scoped>

@@ -35,7 +35,7 @@ class Booking
     #[ORM\Column]
     private ?int $bkg_cost;
 
-    #[ORM\Column(columnDefinition:"INT CHECK (0 <= bkg_status AND bkg_status >= 2)")]
+    #[ORM\Column]
     private ?int $bkg_status;
 
     #[ORM\ManyToOne(targetEntity:Car::class, inversedBy:"bookings")]
@@ -136,16 +136,6 @@ class Booking
         return $this;
     }
 
-    public function getBkgStatus(): ?int
-    {
-        return $this->bkg_status;
-    }
-
-    public function setBkgStatus(int $bkg_status): static
-    {
-        $this->bkg_status = $bkg_status;
-        return $this;
-    }
 
     public function getCar(): ?Car
     {
@@ -191,6 +181,18 @@ class Booking
     public function setStationService(?StationService $station_service): static
     {
         $this->station_service = $station_service;
+
+        return $this;
+    }
+
+    public function getBkgStatus(): ?int
+    {
+        return $this->bkg_status;
+    }
+
+    public function setBkgStatus(int $bkg_status): static
+    {
+        $this->bkg_status = $bkg_status;
 
         return $this;
     }

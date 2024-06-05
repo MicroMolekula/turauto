@@ -22,7 +22,7 @@ class AddService
     #[ORM\JoinTable(name:"service_car")]
     #[ORM\JoinColumn(name:"srv_type", referencedColumnName:"srv_type")]
     #[ORM\InverseJoinColumn(name:"car_vin", referencedColumnName:"car_vin")]
-    private ?ArrayCollection $cars;
+    private ?Collection $cars;
 
     public function __construct()
     {

@@ -6,7 +6,6 @@
         <div class="flex justify-between">
             <v-date-input prepend-icon="" class="mr-10" max-width="300" variant="underlined" label="Дата"></v-date-input>
             <v-text-field variant="underlined" label="Время" v-mask="'##:##'"></v-text-field>
-            
         </div>
     </div>
 </template>

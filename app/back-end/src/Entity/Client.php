@@ -6,9 +6,11 @@ use App\Repository\ClientRepository;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
+use phpDocumentor\Reflection\Types\Nullable;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: ClientRepository::class)]
-class Client
+class Client implements PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -46,7 +48,7 @@ class Client
     private ?string $clt_password;
 
     #[ORM\OneToMany(targetEntity:Booking::class, mappedBy:"client")]
-    private ?ArrayCollection $bookings;
+    private ?Collection $bookings;
 
     public function __construct()
     {
@@ -166,7 +168,7 @@ class Client
         return $this;
     }
 
-    public function getCltPassword(): ?string
+    public function getPassword(): ?string
     {
         return $this->clt_password;
     }
@@ -211,5 +213,10 @@ class Client
         }
 
         return $this;
+    }
+
+    public function getCltPassword(): ?string
+    {
+        return $this->clt_password;
     }
 }
