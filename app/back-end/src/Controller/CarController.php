@@ -3,8 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\Car;
-use App\Form\CarType;
+use App\Entity\CarClass;
+use App\Entity\StationService;
 use App\Repository\CarRepository;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -26,76 +28,94 @@ class CarController extends AbstractController
         $cars = $carRepository->findAll();
 
         $carsResponse = [];
-        foreach($cars as $car){
-            if($car->getCarStatus() !== 0)
-            {
+        foreach ($cars as $car) {
+            if ($car->getCarStatus() !== 0) {
                 $carsResponse[] = [
-                    "car_vin" => $car->getCarVin(),
-                    "img" => $car->getCarImg(),
-                    "title" => $car->getCarMake() . " " . $car->getCarModel(),
-                    "date" => $car->getCarDateOfIssue(),
-                    "price" => $car->getCarClass()->getClsCoefCost() * 2000,
+                    "id" => $car->getCarVin(),
+                    "mark" => $car->getCarMake(),
+                    "model" => $car->getCarModel(),
+                    "date" => $car->getCarDateOfIssue()->format('Y-m-d'),
+                    "state_number" => $car->getCarStateNumber(),
+                    "cls_title" => $car->getCarClass()->getClsTitle(),
+                    "image" => $car->getCarImg(),
+                    "station_service" => $car->getStationService()->getStnAddress(),
+                    "body_type" => $car->getCarBodyType(),
+                    "color" => $car->getCarColor(),
                     "status" => $car->getCarStatus(),
+                    "gearbox" => $car->getCarGearboxType(),
                 ];
             }
         }
         return $this->json($carsResponse);
     }
 
-    #[Route('/new', name: 'app_car_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    #[Route('/new', methods: ["POST"])]
+    public function new(Request $request, EntityManagerInterface $manager): Response
     {
+        $request = $request->toArray();
         $car = new Car();
-        $form = $this->createForm(CarType::class, $car);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($car);
-            $entityManager->flush();
-
-            return $this->redirectToRoute('app_car_index', [], Response::HTTP_SEE_OTHER);
-        }
-
-        return $this->render('car/new.html.twig', [
-            'car' => $car,
-            'form' => $form,
-        ]);
+        $car->setCarVin($request['id'])
+            ->setCarMake($request['mark'])
+            ->setCarModel($request['model'])
+            ->setCarDateOfIssue(DateTimeImmutable::createFromFormat('Y-m-d', $request['date']))
+            ->setCarClass($manager->getRepository(CarClass::class)->findBy(['cls_title' => $request['cls_title']])[0])
+            ->setCarImg($request['image'])
+            ->setCarStateNumber($request['state_number'])
+            ->setCarGearboxType($request['gearbox'])
+            ->setCarColor($request['color'])
+            ->setCarStatus($request['status'])
+            ->setStationService($manager->getRepository(StationService::class)->findBy(['stn_address' => $request['station_service']])[0])
+            ->setCarBodyType($request['body_type']);
+        $manager->persist($car);
+        $manager->flush();
+        return $this->json($request);
     }
 
-    #[Route('/{car_vin}', name: 'app_car_show', methods: ['GET'])]
-    public function show(Car $car): Response
+    #[Route('/{car_vin}/edit', methods: ['PUT', 'PATCH'])]
+    public function edit(Request $request, EntityManagerInterface $manager, string $car_vin): Response
     {
-        return $this->render('car/show.html.twig', [
-            'car' => $car,
-        ]);
+        $request = $request->toArray();
+        $car = $manager->getRepository(Car::class)->findBy(['car_vin' => $car_vin])[0];
+        if ($car) {
+            $car->setCarMake($request['mark'])
+                ->setCarModel($request['model'])
+                ->setCarDateOfIssue(DateTimeImmutable::createFromFormat('Y-m-d', $request['date']))
+                ->setCarClass($manager->getRepository(CarClass::class)->findBy(['cls_title' => $request['cls_title']])[0])
+                ->setCarImg($request['image'])
+                ->setCarStateNumber($request['state_number'])
+                ->setCarGearboxType($request['gearbox'])
+                ->setCarColor($request['color'])
+                ->setCarStatus($request['status'])
+                ->setStationService($manager->getRepository(StationService::class)->findBy(['stn_address' => $request['station_service']])[0])
+                ->setCarBodyType($request['body_type']);
+            $manager->persist($car);
+            $manager->flush();
+            return $this->json($request);
+        }
+        return $this->json(['error' => 'Такого автомобиля не существует']);
     }
 
-    #[Route('/{car_vin}/edit', name: 'app_car_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Car $car, EntityManagerInterface $entityManager): Response
+    #[Route('/{car_vin}/delete', methods: ['DELETE'])]
+    public function delete(EntityManagerInterface $manager, string $car_vin)
     {
-        $form = $this->createForm(CarType::class, $car);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush();
-
-            return $this->redirectToRoute('app_car_index', [], Response::HTTP_SEE_OTHER);
+        $car = $manager->getRepository(Car::class)->findBy(['car_vin' => $car_vin])[0];
+        if($car){
+            $manager->remove($car);
+            $manager->flush();
+            return $this->json(['ok' => "Автомобиль удален"]);
         }
-
-        return $this->render('car/edit.html.twig', [
-            'car' => $car,
-            'form' => $form,
-        ]);
+        return $this->json(['error' => 'Такого автомобиля не существует']);
     }
 
-    #[Route('/{car_vin}', name: 'app_car_delete', methods: ['POST'])]
-    public function delete(Request $request, Car $car, EntityManagerInterface $entityManager): Response
+    #[Route('/upload', methods: ['POST'])]
+    public function upload(Request $request)
     {
-        if ($this->isCsrfTokenValid('delete'.$car->getCarVin(), $request->getPayload()->get('_token'))) {
-            $entityManager->remove($car);
-            $entityManager->flush();
+        $file = $request->files->get('demo')[0];
+        if ($file) {
+            $filename = $file->getClientOriginalName();
+            $file->move($this->getParameter('upload_directory'), $filename);
+            return $this->json(["path" => "/img/cars/" . "$filename"]);
         }
-
-        return $this->redirectToRoute('app_car_index', [], Response::HTTP_SEE_OTHER);
+        return $this->json(["er" => $file]);
     }
 }

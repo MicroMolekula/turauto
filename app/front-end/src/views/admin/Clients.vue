@@ -22,7 +22,8 @@ function getData() {
         datas.value = datas.value.map((el) => {
             el.passport_details = editNumberDoc(el.passport_details);
             el.num_drv_lic = editNumberDoc(el.num_drv_lic);
-            el.category_drv_lic = el.category_drv_lic.split(" ");
+            el.category_drv_lic = el.category_drv_lic.split(' ');
+            el.phone = phoneToStr(el.phone);
             return el;
         });
     });
@@ -69,8 +70,15 @@ function deleteDataAx(id) {
         });
 }
 
+function getCategDrvLic() {
+    axios.get(sourceUrl() + '/utils/category_drv_lic').then((response) => {
+        categorys_drv_lic.value = response.data.data;
+    });
+}
+
 onMounted(() => {
     getData();
+    getCategDrvLic();
 });
 
 onBeforeMount(() => {
@@ -82,6 +90,7 @@ let data = ref({});
 const dataDialog = ref(false);
 const deleteDataDialog = ref(false);
 const submitted = ref(false);
+let categorys_drv_lic = ref();
 
 const openNew = () => {
     data.value = {};
@@ -124,21 +133,26 @@ const saveData = () => {
     submitted.value = true;
     if (data.value.surname && data.value.name.trim()) {
         if (data.value.id) {
+            console.log(data.value);
+            data.value.date_drv_lic = typeof data.value.date_drv_lic === 'object' ? toISO(data.value.date_drv_lic.toLocaleDateString()) : data.value.date_drv_lic;
+            console.log(data.value);
             datas.value[findIndexById(data.value.id)] = data.value;
-            let response = data.value;
+            console.log(data.value);
+            let response = Object.assign({}, data.value);
             response.passport_details = response.passport_details.replace(/\s/g, '');
             response.num_drv_lic = response.num_drv_lic.replace(/\s/g, '');
+            response.category_drv_lic = response.category_drv_lic.join(' ');
+            response.phone = strPhoneToNumber(response.phone);
             updateData(response, response.id);
-            toast.add({ severity: 'success', summary: 'Успешно', detail: 'Данные менеджера измененны', life: 3000 });
-            console.log(response);
+            toast.add({ severity: 'success', summary: 'Успешно', detail: 'Данные клиента измененны', life: 3000 });
         } else {
             datas.value.push(data.value);
-            let response = data.value;
+            let response = Object.assign({}, data.value);
             response.passport_details = response.passport_details.replace(/\s/g, '');
             response.num_drv_lic = response.num_drv_lic.replace(/\s/g, '');
+            response.category_drv_lic = response.category_drv_lic.join(' ');
             newData(response);
-            toast.add({ severity: 'success', summary: 'Успешно', detail: 'Менеджер добавлен', life: 3000 });
-            console.log(response);
+            toast.add({ severity: 'success', summary: 'Успешно', detail: 'Клиент добавлен', life: 3000 });
         }
         dataDialog.value = false;
         data.value = {};
@@ -170,6 +184,20 @@ const search = (event) => {
 
 const categoryToStr = (el) => {
     return el.join(', ');
+};
+
+const toISO = (el) => {
+    return `${el.split('.')[2]}-${el.split('.')[1]}-${el.split('.')[0]}`;
+};
+
+const phoneToStr = (el) => {
+    return `(${el.slice(0, 3)}) ${el.slice(3, 6)} ${el.slice(6, 8)}-${el.slice(8)}`;
+};
+
+const strPhoneToNumber = (el) => {
+    let cleanedNumber = el.replace(/\D/g, '');
+    let number = parseInt(cleanedNumber, 10);
+    return number.toString();
 };
 </script>
 
@@ -222,19 +250,19 @@ const categoryToStr = (el) => {
                             {{ slotProps.data.email }}
                         </template>
                     </Column>
-                    <Column field="phone" header="Номер телефона" :sortable="true">
+                    <Column field="phone" header="Номер телефона" :sortable="true" headerStyle="min-width:12rem;">
                         <template #body="slotProps">
                             <span class="p-column-title">Номер телефона</span>
-                            {{ slotProps.data.phone }}
+                            {{'+7'+ " " + slotProps.data.phone }}
                         </template>
                     </Column>
-                    <Column field="passport_details" header="Паспортные данные" :sortable="true">
+                    <Column field="passport_details" header="Паспортные данные" :sortable="true" headerStyle="min-width:6rem;">
                         <template #body="slotProps">
                             <span class="p-column-title">Паспортные данные</span>
                             {{ slotProps.data.passport_details }}
                         </template>
                     </Column>
-                    <Column field="num_drv_lic" header="Номер ВУ" :sortable="true">
+                    <Column field="num_drv_lic" header="Номер ВУ" :sortable="true" headerStyle="min-width:12rem;">
                         <template #body="slotProps">
                             <span class="p-column-title">Номер ВУ</span>
                             {{ slotProps.data.num_drv_lic }}
@@ -262,7 +290,7 @@ const categoryToStr = (el) => {
                 <!---->
 
                 <!--Диалог изменений-->
-                <Dialog v-model:visible="dataDialog" :style="{ width: '450px' }" header="Информация о менеджере" :modal="true" class="p-fluid">
+                <Dialog v-model:visible="dataDialog" :style="{ width: '450px' }" header="Информация о клиенте" :modal="true" class="p-fluid">
                     <div class="field">
                         <label for="surname">Фамилия</label>
                         <InputText id="surname" v-model.trim="data.surname" required="true" autofocus :invalid="submitted && !data.surname" />
@@ -283,9 +311,9 @@ const categoryToStr = (el) => {
                         <InputText id="email" v-model.trim="data.email" required="true" autofocus :invalid="submitted && !data.email" />
                         <small class="p-invalid" v-if="submitted && !data.email">Вы не указали Email.</small>
                     </div>
-                    <div class="field" v-if="!data.id">
+                    <div class="field">
                         <label for="phone">Номер телефона</label>
-                        <InputText id="phone" v-model.trim="data.phone" required="true" autofocus :invalid="submitted && !data.phone" />
+                        <InputMask id="phone" v-model="data.phone" mask="(999) 999 99-99" placeholder="(000) 000 00-00" required="true" autofocus :invalid="submitted && !data.phone" />
                         <small class="p-invalid" v-if="submitted && !data.phone">Вы не указали Номер телефона.</small>
                     </div>
                     <div class="field">
@@ -300,7 +328,7 @@ const categoryToStr = (el) => {
                     </div>
                     <div class="field">
                         <label for="category_drv_lic">Категории ВУ</label>
-                        <MultiSelect v-model="data.category_drv_lic" :options="['В1', 'В', 'С']" placeholder="Категории ВУ" :maxSelectedLabels="3" class="w-full md:w-20rem" />
+                        <MultiSelect v-model="data.category_drv_lic" :options="categorys_drv_lic" placeholder="Категории ВУ" :maxSelectedLabels="3" class="w-full md:w-20rem" />
                         <small class="p-invalid" v-if="submitted && !data.category_drv_lic">Вы не указали Категории ВУ.</small>
                     </div>
                     <div class="field">

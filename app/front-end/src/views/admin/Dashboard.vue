@@ -136,18 +136,16 @@ const saveData = () => {
     if (data.value.surname && data.value.name.trim()) {
         if (data.value.id) {
             datas.value[findIndexById(data.value.id)] = data.value;
-            let response = data.value;
+            let response = Object.assign({}, data.value);
             response.passport_details = response.passport_details.replace(/\s/g, '');
             updateData(response, response.id);
             toast.add({ severity: 'success', summary: 'Успешно', detail: 'Данные менеджера измененны', life: 3000 });
-            console.log(response);
         } else {
             datas.value.push(data.value);
-            let response = data.value;
+            let response = Object.assign({}, data.value);
             response.passport_details = response.passport_details.replace(/\s/g, '');
             newData(response);
             toast.add({ severity: 'success', summary: 'Успешно', detail: 'Менеджер добавлен', life: 3000 });
-            console.log(response);
         }
         dataDialog.value = false;
         data.value = {};
