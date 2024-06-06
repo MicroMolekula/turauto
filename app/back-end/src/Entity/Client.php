@@ -6,7 +6,6 @@ use App\Repository\ClientRepository;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
-use phpDocumentor\Reflection\Types\Nullable;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: ClientRepository::class)]
@@ -46,6 +45,9 @@ class Client implements PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 255)]
     private ?string $clt_password;
+
+    #[ORM\Column(nullable:true)]
+    private ?\DateTimeImmutable $deleted_at = null;
 
     #[ORM\OneToMany(targetEntity:Booking::class, mappedBy:"client")]
     private ?Collection $bookings;
@@ -218,5 +220,17 @@ class Client implements PasswordAuthenticatedUserInterface
     public function getCltPassword(): ?string
     {
         return $this->clt_password;
+    }
+
+    public function getDeletedAt(): ?\DateTimeImmutable
+    {
+        return $this->deleted_at;
+    }
+
+    public function setDeletedAt(?\DateTimeImmutable $deleted_at): static
+    {
+        $this->deleted_at = $deleted_at;
+
+        return $this;
     }
 }

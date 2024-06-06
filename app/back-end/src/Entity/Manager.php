@@ -29,6 +29,9 @@ class Manager implements PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 10)]
     private ?string $mng_passport_details;
 
+    #[ORM\Column(length:128)]
+    private ?string $mng_email;
+
     #[ORM\Column(length: 255)]
     private ?string $mng_password;
 
@@ -189,5 +192,17 @@ class Manager implements PasswordAuthenticatedUserInterface
     public function getMngPassword(): ?string
     {
         return $this->mng_password;
+    }
+
+    public function getMngEmail(): ?string
+    {
+        return $this->mng_email;
+    }
+
+    public function setMngEmail(string $mng_email): static
+    {
+        $this->mng_email = $mng_email;
+
+        return $this;
     }
 }

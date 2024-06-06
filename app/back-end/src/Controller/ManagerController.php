@@ -36,6 +36,7 @@ class ManagerController extends AbstractController
                 "station_service" => $manager->getStationService()->getStnAddress(),
                 "passport_details" => $manager->getMngPassportDetails(),
                 "role" => $manager->getMngRole() === 'admin' ? "Старший менеджер" : "Младший менеджер",
+                "email" => $manager->getMngEmail(),
             ];
         }
         return $this->json($response);
@@ -51,6 +52,7 @@ class ManagerController extends AbstractController
             ->setMngMidlename($request["middlename"])
             ->setStationService($manager->getRepository(StationService::class)->findBy(["stn_address" => $request['station_service']])[0])
             ->setMngPassportDetails($request['passport_details'])
+            ->setMngEmail($request['email'])
             ->setMngRole('manager');
         $password = $this->hasher->hashPassword($managerObject, $request['password']);
         $managerObject->setMngPassword($password);

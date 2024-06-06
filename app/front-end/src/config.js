@@ -1,8 +1,8 @@
-let host = "localhost"
-let port = 80
+let host = "localhost";
+let port = '80';
 
 function sourceUrl(){
-    return "http://"+host+":"+port
+    return "http://"+host+":"+port;
 }
 
-export default sourceUrl
+export default sourceUrl;
