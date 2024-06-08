@@ -2,12 +2,50 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useLayout } from '@/layout/composables/layout';
 import { useRouter } from 'vue-router';
+import axios from 'axios';
+import sourceUrl from '@/config';
+
+const router = useRouter();
+
+if(localStorage.getItem('user_id') == '' || localStorage.getItem('user_id') == undefined) {
+    router.push('/');
+}
+
+
+onMounted(() => {
+    getUserData();
+});
 
 const { layoutConfig, onMenuToggle } = useLayout();
 
 const outsideClickListener = ref(null);
 const topbarMenuActive = ref(false);
-const router = useRouter();
+const op = ref();
+const user_data = ref({
+    surname: '',
+    name: '',
+    middlename: ''
+});
+
+function getUserData(){
+    if(localStorage.getItem('user_role') == 'client'){
+        axios.get(sourceUrl() + '/client/' + localStorage.getItem('user_id').toString() + '/show')
+        .then((response) => {
+            user_data.value.surname = response.data.surname;
+            user_data.value.name = response.data.name;
+            user_data.value.middlename = response.data.middlename;
+        });
+    }
+    if(localStorage.getItem('user_role') == 'admin' || localStorage.getItem('user_role') == 'manager'){
+        axios.get(sourceUrl() + '/manager/' + localStorage.getItem('user_id').toString() + '/show')
+        .then((response) => {
+            user_data.value.surname = response.data.surname;
+            user_data.value.name = response.data.name;
+            user_data.value.middlename = response.data.middlename;
+        });
+    }
+}
+
 
 onMounted(() => {
     bindOutsideClickListener();
@@ -17,9 +55,6 @@ onBeforeUnmount(() => {
     unbindOutsideClickListener();
 });
 
-const logoUrl = computed(() => {
-    return `/layout/images/${layoutConfig.darkTheme.value ? 'logo-white' : 'logo-dark'}.svg`;
-});
 
 const onTopBarMenuButton = () => {
     topbarMenuActive.value = !topbarMenuActive.value;
@@ -58,6 +93,16 @@ const isOutsideClicked = (event) => {
 
     return !(sidebarEl.isSameNode(event.target) || sidebarEl.contains(event.target) || topbarEl.isSameNode(event.target) || topbarEl.contains(event.target));
 };
+
+const toggle = (event) => {
+    op.value.toggle(event);
+};
+
+const logout = () => {
+    localStorage.setItem('user_role', '');
+    localStorage.setItem('user_id', '');
+    router.push('/'); 
+};
 </script>
 
 <template>
@@ -76,15 +121,13 @@ const isOutsideClicked = (event) => {
         </button>
 
         <div class="layout-topbar-menu" :class="topbarMenuClasses">
-            <button @click="onTopBarMenuButton()" class="p-link layout-topbar-button">
-                <i class="pi pi-calendar"></i>
-                <span>Calendar</span>
-            </button>
-            <button @click="onTopBarMenuButton()" class="p-link layout-topbar-button">
-                <i class="pi pi-user"></i>
-                <span>Profile</span>
-            </button>
+            <div class="mr-3 flex" style="align-items: center; font-size: 1.3rem;">{{ user_data.surname + " " + user_data.name }}</div>
+            <Button icon="pi pi-user" @click="toggle" severity="secondary"></Button>
         </div>
+
+        <OverlayPanel ref="op">
+                <Button label="Выйти из аккаунта" severity="danger" @click="logout"></Button>
+        </OverlayPanel>
     </div>
 </template>
 

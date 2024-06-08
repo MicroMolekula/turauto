@@ -127,6 +127,7 @@ const gearboxes = ref();
 const carBodyType = ref();
 const carClasses = ref();
 const image = ref();
+const visible =  localStorage.getItem('user_role') !== 'client';
 
 const openNew = () => {
     data.value = {};
@@ -234,6 +235,8 @@ const checkEdit = () => {
 </script>
 
 <template>
+    <div v-if="visible">
+    </div>
     <div v-if="datas == undefined" style="text-align: center">
         <i class="pi pi-spin pi-spinner" style="font-size: 4rem; margin-top: 16rem"></i>
     </div>
@@ -275,13 +278,13 @@ const checkEdit = () => {
                                         </div>
                                         <div>
                                             <ul>
-                                                <li><b>VIN-номер:</b> {{ item.id }}</li>
-                                                <li><b>Гос. номер:</b> {{ item.state_number }}</li>
-                                                <li><b>Класс авто:</b> {{ item.cls_title }}</li>
-                                                <li><b>Цвет:</b> {{ item.color }}</li>
-                                                <li><b>Тип кузова:</b> {{ item.body_type }}</li>
-                                                <li><b>Коробка передач:</b> {{ item.gearbox }}</li>
-                                                <li><b>Пункт обслуживания:</b> {{ item.station_service }}</li>
+                                                <li style="list-style-type: none"><b>VIN-номер:</b> {{ item.id }}</li>
+                                                <li style="list-style-type: none"><b>Гос. номер:</b> {{ item.state_number }}</li>
+                                                <li style="list-style-type: none"><b>Класс авто:</b> {{ item.cls_title }}</li>
+                                                <li style="list-style-type: none"><b>Цвет:</b> {{ item.color }}</li>
+                                                <li style="list-style-type: none"><b>Тип кузова:</b> {{ item.body_type }}</li>
+                                                <li style="list-style-type: none"><b>Коробка передач:</b> {{ item.gearbox }}</li>
+                                                <li style="list-style-type: none"><b>Пункт обслуживания:</b> {{ item.station_service }}</li>
                                             </ul>
                                         </div>
                                     </div>
@@ -292,7 +295,7 @@ const checkEdit = () => {
                 </DataView>
 
                 <!--Диалог изменений-->
-                <Dialog v-model:visible="dataDialog" :style="{ width: '450px' }" header="Информация о клиенте" :modal="true" class="p-fluid">
+                <Dialog v-model:visible="dataDialog" :style="{ width: '450px' }" header="Информация о автомобиле" :modal="true" class="p-fluid">
                     <div class="field">
                         <label for="mark">Изображение авто</label>
                         <FileUpload mode="basic" :url="sourceUrl()+'/car/upload'" name="demo[]"  accept="image/*" :maxFileSize="1000000" @upload="onUpload" />

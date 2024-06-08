@@ -76,6 +76,7 @@ const deleteDataDialog = ref(false);
 const submitted = ref(false);
 const stations_service = ref();
 const filtered_station_service = ref();
+const adminRole = localStorage.getItem('user_role') == 'admin';
 
 const openNew = () => {
     data.value = {};
@@ -185,15 +186,11 @@ const strPhoneToNumber = (el) => {
     <div class="grid" v-if="datas !== undefined">
         <div class="col-12">
             <div class="card">
-                <Toolbar class="mb-4">
+                <Toolbar class="mb-4" v-if="adminRole">
                     <template v-slot:start>
                         <div class="my-2">
                             <Button label="Новый" icon="pi pi-plus" class="mr-2" severity="success" @click="openNew" />
                         </div>
-                    </template>
-
-                    <template v-slot:end>
-                        <Button label="Excel" icon="pi pi-upload" severity="help" @click="exportCSV($event)" />
                     </template>
                 </Toolbar>
                 <!--Данные-->
@@ -227,9 +224,9 @@ const strPhoneToNumber = (el) => {
                             {{ slotProps.data.date_end }}
                         </template>
                     </Column>
-                    <Column headerStyle="min-width:10rem;">
+                    <Column headerStyle="min-width:10rem;" v-if="adminRole">
                         <template #body="slotProps">
-                            <Button icon="pi pi-pencil" class="mr-2" severity="success" rounded text @click="editData(slotProps.data)" />
+                            <Button  icon="pi pi-pencil" class="mr-2" severity="success" rounded text @click="editData(slotProps.data)" />
                             <Button icon="pi pi-trash" class="mt-2" severity="danger" rounded text @click="confirmDeleteData(slotProps.data)" />
                         </template>
                     </Column>
@@ -237,7 +234,7 @@ const strPhoneToNumber = (el) => {
                 <!---->
 
                 <!--Диалог изменений-->
-                <Dialog v-model:visible="dataDialog" :style="{ width: '450px' }" header="Информация о менеджере" :modal="true" class="p-fluid">
+                <Dialog v-model:visible="dataDialog" :style="{ width: '450px' }" header="Информация о пункте обслуживания" :modal="true" class="p-fluid">
                     <div class="field">
                         <label for="surname">Адрес</label>
                         <InputText id="address" v-model.trim="data.address" required="true" autofocus :invalid="submitted && !data.address" />

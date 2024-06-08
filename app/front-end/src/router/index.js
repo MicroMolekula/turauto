@@ -7,77 +7,74 @@ import CarClass from '@/views/admin/CarClass.vue';
 import Clients from '@/views/admin/Clients.vue';
 import StationService from '@/views/admin/StationService.vue';
 import AddService from '@/views/admin/AddService.vue';
+import Auth from '@/views/Auth.vue';
+import Main from '@/views/Main.vue';
+import Registration from '@/views/Registration.vue';
 
 const router = createRouter({
     history: createWebHistory(),
     routes: [
         {
-            path: '/mng',
+            path: '/home',
             component: AppLayout,
             children: [
                 {
-                    path: '/mng/manager',
+                    path: '/manager',
                     name: 'dashboard',
                     component: Dashboard,
                 },
                 {
-                    path: '/mng/booking',
+                    path: '/booking',
                     name: 'booking',
                     component: Booking,
                 },
                 {
-                    path: '/mng/client',
+                    path: '/client',
                     name: 'client',
                     component: Clients,
                 },
                 {
-                    path: '/mng/car_class',
+                    path: '/car_class',
                     name: 'car_class',
                     component: CarClass,
                 },
                 {
-                    path: '/mng/car',
+                    path: '/car',
                     name: 'car',
                     component: Cars,
                 },
                 {
-                    path: '/mng/station_service',
+                    path: '/station_service',
                     name: 'station_service',
                     component: StationService,
                 },
                 {
-                    path: '/mng/add_service',
+                    path: '/add_service',
                     name: 'add_service',
                     component: AddService,
                 },
             ]
         },
         {
-            path: '/landing',
-            name: 'landing',
-            component: () => import('@/views/pages/Landing.vue')
+            path: '/auth',
+            name: 'auth',
+            component: Auth
+        },
+        {
+            path: '/reg',
+            name: 'reg',
+            component: Registration
+        },
+        {
+            path: '/',
+            name: 'main',
+            component: Main
         },
         {
             path: '/pages/notfound',
             name: 'notfound',
             component: () => import('@/views/pages/NotFound.vue')
         },
-
-        {
-            path: '/auth/login',
-            name: 'login',
-            component: () => import('@/views/pages/auth/Login.vue')
-        },
-        {
-            path: '/auth/access',
-            name: 'accessDenied',
-            component: () => import('@/views/pages/auth/Access.vue')
-        },
-        {
-            path: '/auth/error',
-            name: 'error',
-            component: () => import('@/views/pages/auth/Error.vue')
-        }
     ]
 });
 
