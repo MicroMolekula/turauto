@@ -72,6 +72,11 @@ class CarController extends AbstractController
                 foreach ($addServices as $addService) {
                     $addServicesArr[] = $addService->getSrvType();
                 }
+                $cost =  $car->getCarClass()->getClsCoefCost()*2000;
+                foreach ($addServices as $addService) {
+                    $cost += $addService->getSrvCost();
+                }
+                
                 $carsResponse[] = [
                     "id" => $car->getCarVin(),
                     "mark" => $car->getCarMake(),
@@ -86,6 +91,7 @@ class CarController extends AbstractController
                     "status" => $car->getCarStatus(),
                     "gearbox" => $car->getCarGearboxType(),
                     "add_services" => $addServicesArr,
+                    "cost" => $cost,
                 ];
             }
         }

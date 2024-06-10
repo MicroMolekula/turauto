@@ -57,7 +57,10 @@ const initFilters = () => {
 </script>
 
 <template>
-    <div class="grid">
+    <div v-if="datas == undefined" style="text-align: center">
+        <i class="pi pi-spin pi-spinner" style="font-size: 4rem; margin-top: 16rem"></i>
+    </div>
+    <div class="grid" v-if="datas !== undefined">
         <div class="col-12">
             <div class="card">
                 <!--Данные-->

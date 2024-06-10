@@ -38,7 +38,7 @@ class ManagerController extends AbstractController
                 "middlename" => $manager->getMngMidlename(),
                 "station_service" => $manager->getStationService()->getStnAddress(),
                 "passport_details" => $manager->getMngPassportDetails(),
-                "role" => $manager->getMngRole() === 'admin' ? "Старший менеджер" : "Младший менеджер",
+                "role" => $manager->getMngRole() === 'admin' ? "Администратор" : "Менеджер",
                 "email" => $manager->getMngEmail(),
             ];
         }

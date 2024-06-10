@@ -262,7 +262,7 @@ const toISO = (el) => {
 const onUpload = (response) => {
     image.value = JSON.parse(response.xhr.response).path;
     console.log(image);
-    toast.add({ severity: 'info', summary: 'Success', detail: 'File Uploaded', life: 3000 });
+    toast.add({ severity: 'info', summary: 'Успешно', detail: 'Файл загружен', life: 3000 });
 };
 
 const checkEdit = () => {
@@ -350,6 +350,7 @@ const hideOrderDialog = () =>{
                                             <div><b>Тип кузова:</b> {{ item.body_type }}</div>
                                             <div><b>Коробка передач:</b> {{ item.gearbox }}</div>
                                             <div><b>Пункт обслуживания:</b> {{ item.station_service }}</div>
+                                            <div><b>Цена:</b> {{ item.cost +'₽ в сутки' }}</div>
                                             <Button v-if="clientRole" label="Заказать" class="mt-3" @click="orderForm(item.id)"></Button>
                                         </div>
                                     </div>

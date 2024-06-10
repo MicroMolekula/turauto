@@ -194,7 +194,7 @@ const search = (event) => {
                 <DataTable :value="datas" :rows="10" tableStyle="min-width: 50rem">
                     <template #header>
                         <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-                            <h5 class="m-0">Менеджеры</h5>
+                            <h5 class="m-0">Сотрудники</h5>
                         </div>
                     </template>
                     <Column field="surname" header="Фамилия" :sortable="true">
@@ -249,7 +249,7 @@ const search = (event) => {
                 <!---->
 
                 <!--Диалог изменений-->
-                <Dialog v-model:visible="dataDialog" :style="{ width: '450px' }" header="Информация о менеджере" :modal="true" class="p-fluid">
+                <Dialog v-model:visible="dataDialog" :style="{ width: '450px' }" header="Информация о Сотруднике" :modal="true" class="p-fluid">
                     <div class="field">
                         <label for="surname">Фамилия</label>
                         <InputText id="surname" v-model.trim="data.surname" required="true" autofocus :invalid="submitted && !data.surname" />
@@ -297,7 +297,7 @@ const search = (event) => {
                     <div class="flex align-items-center justify-content-center">
                         <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
                         <span v-if="data"
-                            >Вы уверены, что хотите удалить менеджера <b>{{ data.surname }}</b
+                            >Вы уверены, что хотите удалить Сотрудника <b>{{ data.surname }}</b
                             >?</span
                         >
                     </div>

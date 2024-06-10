@@ -8,7 +8,7 @@ const model = ref([
         label: 'Главная',
         items: [
             { label: 'Заказы', icon: 'pi pi-fw pi-book', to: '/booking', 'visible': localStorage.getItem("user_role") != 'client' },
-            { label: 'Mенеджеры', icon: 'pi pi-fw pi-user', to: '/manager', 'visible': localStorage.getItem("user_role") == 'admin'},
+            { label: 'Сотрудники', icon: 'pi pi-fw pi-user', to: '/manager', 'visible': localStorage.getItem("user_role") == 'admin'},
             { label: 'Пункты обслуживания', icon: 'pi pi-fw pi-building', to: '/station_service' },
             { label: 'Клиенты', icon: 'pi pi-fw pi-user', to: '/client', 'visible': localStorage.getItem("user_role") != 'client' },
             { label: 'Автомобили', icon: 'pi pi-fw pi-car', to: '/car' },
