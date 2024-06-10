@@ -140,4 +140,44 @@ class ManagerController extends AbstractController
         $session->remove('user_id');
         return $this->json(['ok']);
     }
+
+    #[Route('/report', methods:['GET'])]
+    public function report(EntityManagerInterface $manager)
+    {
+        $response = $manager->getRepository(Manager::class)->report();
+        return $this->json($response);
+    }
+
+    #[Route('/{mng_id}/bookings', methods:['GET'])]
+    public function bookings(EntityManagerInterface $manager, int $mng_id)
+    {
+        $client = $manager->getRepository(Manager::class)->findOneBy(['mng_id' => $mng_id]);
+        $bookings = $client->getBookings();
+        $response = [];
+        foreach($bookings as $booking){
+            $response[] = [
+                "id" => $booking->getBkgId(),
+                "car" => [
+                    "id" => $booking->getCar()->getCarVin(),
+                    "mark" => $booking->getCar()->getCarMake(),
+                    "model" => $booking->getCar()->getCarModel(),
+                    "date" => $booking->getCar()->getCarDateOfIssue(),
+                    "state_number" => $booking->getCar()->getCarStateNumber(),
+                ],
+                "client" => [
+                    "id" => $booking->getClient()->getId(),
+                    "surname" => $booking->getClient()->getCltSurname(),
+                    "name" => $booking->getClient()->getCltName(),
+                    "middlename" => $booking->getClient()->getCltMidlename(),
+                    "email" => $booking->getClient()->getCltEmail(),
+                ],
+                "station_service" => $booking->getStationService()->getStnAddress(),
+                "date_begin" => $booking->getBkgDateBegin()->format("Y-m-d H:i:s"),
+                "date_end" => $booking->getBkgDateEnd()->format("Y-m-d H:i:s"),
+                "cost" => $booking->getBkgCost(),
+                "status" => $booking->getBkgStatus(),
+            ];
+        }
+        return $this->json($response);
+    }
 }

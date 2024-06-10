@@ -14,7 +14,17 @@ function getData() {
         datas.value = response.data;
         datas.value = datas.value.map((el) => {
             el.date = el.date.split('-')[0];
-            return el;  
+            return el;
+        });
+    });
+}
+
+function getCarsFCl() {
+    axios.get(sourceUrl() + '/car/for_client/').then(function (response) {
+        datas.value = response.data;
+        datas.value = datas.value.map((el) => {
+            el.date = el.date.split('-')[0];
+            return el;
         });
     });
 }
@@ -60,7 +70,6 @@ function deleteDataAx(id) {
         });
 }
 
-
 function getStnServ() {
     axios.get(sourceUrl() + '/station_service').then(function (response) {
         stations_service.value = response.data;
@@ -74,7 +83,7 @@ function getStnServ() {
 
 function getCarClasses() {
     axios.get(sourceUrl() + '/car_class').then(function (response) {
-        console.log(response.data)
+        console.log(response.data);
         carClasses.value = response.data;
         let tmp = [];
         carClasses.value.forEach((element) => {
@@ -86,24 +95,40 @@ function getCarClasses() {
 
 function getGearboxes() {
     axios.get(sourceUrl() + '/utils/gearboxes').then(function (response) {
-       gearboxes.value = response.data;
-       console.log(gearboxes)
+        gearboxes.value = response.data;
+        console.log(gearboxes);
     });
 }
 
 function getCarBodyType() {
     axios.get(sourceUrl() + '/utils/car_body_type').then(function (response) {
-       carBodyType.value = response.data;
-       console.log(carBodyType)
+        carBodyType.value = response.data;
+        console.log(carBodyType);
+    });
+}
+
+function getAddServices() {
+    axios.get(sourceUrl() + '/add_service')
+    .then((response) => {
+        response.data.forEach(element => {
+            addServicesArray.value.push(element.title);
+        });
+        console.log(addServicesArray);
     });
 }
 
 onMounted(() => {
-    getData();
+    if(localStorage.getItem('user_role') == 'client'){
+        getCarsFCl();
+    }
+    else {
+        getData();
+    }
     getStnServ();
     getGearboxes();
     getCarBodyType();
     getCarClasses();
+    getAddServices();
 });
 
 onBeforeMount(() => {
@@ -116,10 +141,10 @@ const dataDialog = ref(false);
 const deleteDataDialog = ref(false);
 const submitted = ref(false);
 let status = ref([
-    {name: "Удален из каталога", code: 0},
-    {name: "В аренде", code: 1},
-    {name: "Находится в пункет выдачи", code: 2},
-    {name: "В ремонте", code: 3},
+    { name: 'Удален из каталога', code: 0 },
+    { name: 'В аренде', code: 1 },
+    { name: 'Находится в пункет выдачи', code: 2 },
+    { name: 'В ремонте', code: 3 }
 ]);
 const stations_service = ref();
 const filtered_station_service = ref();
@@ -127,7 +152,19 @@ const gearboxes = ref();
 const carBodyType = ref();
 const carClasses = ref();
 const image = ref();
-const visible =  localStorage.getItem('user_role') !== 'client';
+const visible = localStorage.getItem('user_role') !== 'client';
+const op = ref();
+const addServices = ref([]);
+const addServicesArray = ref([]);
+const adminRole = localStorage.getItem('user_role') == 'admin';
+const managerRole = localStorage.getItem('user_role') == 'admin' || localStorage.getItem('user_role') == 'manager';
+const clientRole = localStorage.getItem('user_role') == 'client';
+const orderDialog = ref(false);
+const orderData = ref({
+    client: localStorage.getItem('user_id'),
+    car: '',
+    count_day: 1,
+});
 
 const openNew = () => {
     data.value = {};
@@ -171,12 +208,12 @@ const saveData = () => {
     submitted.value = true;
     if (data.value.model) {
         if (checkEdit()) {
-            console.log(data.value)
-            data.value.image = image.value == undefined ? data.value.image : image.value ;
+            console.log(data.value);
+            data.value.image = image.value == undefined ? data.value.image : image.value;
             data.value.date = typeof data.value.date === 'object' ? data.value.date.toLocaleDateString().split('.')[2] : data.value.date;
             datas.value[findIndexById(data.value.id)] = data.value;
             let response = Object.assign({}, data.value);
-            response.date = response.date + "-01-01";
+            response.date = response.date + '-01-01';
             console.log(response);
             updateData(response, response.id);
             toast.add({ severity: 'success', summary: 'Успешно', detail: 'Данные автомобиля измененны', life: 3000 });
@@ -185,7 +222,7 @@ const saveData = () => {
             data.value.date = typeof data.value.date === 'object' ? data.value.date.toLocaleDateString().split('.')[2] : data.value.date;
             datas.value.push(data.value);
             let response = Object.assign({}, data.value);
-            response.date = response.date + "-01-01";
+            response.date = response.date + '-01-01';
             console.log(response);
             newData(response);
             toast.add({ severity: 'success', summary: 'Успешно', detail: 'Автомобиль добавлен', life: 3000 });
@@ -232,11 +269,44 @@ const checkEdit = () => {
     return findIndexById(data.value.id) === -1 ? false : true;
 };
 
+const toggle = (event) => {
+    op.value.toggle(event);
+};
+
+const addDataServices = (data) => {
+    console.log(data);
+    addServices.value = [...data];
+};
+
+const orderForm = (id) => {
+    orderData.value.car = id;
+    orderDialog.value = true;
+};
+
+const saveOrder = () => {
+    let obj = Object.assign({}, orderData.value);
+    console.log(obj);
+    axios({
+        method: 'post',
+        url: sourceUrl() + '/booking/new',
+        data: obj
+    })
+        .then(function (response) {
+            console.log(response.data);
+            orderDialog.value = false;
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
+};
+
+const hideOrderDialog = () =>{
+    orderDialog.value = false;
+};
 </script>
 
 <template>
-    <div v-if="visible">
-    </div>
+    <div v-if="visible"></div>
     <div v-if="datas == undefined" style="text-align: center">
         <i class="pi pi-spin pi-spinner" style="font-size: 4rem; margin-top: 16rem"></i>
     </div>
@@ -245,47 +315,42 @@ const checkEdit = () => {
             <div class="card">
                 <Toolbar class="mb-4">
                     <template v-slot:start>
-                        <div class="my-2">
+                        <div class="my-2" v-if="adminRole">
                             <Button label="Новый" icon="pi pi-plus" class="mr-2" severity="success" @click="openNew" />
                         </div>
                     </template>
-
-                    <template v-slot:end>
-                        <Button label="Excel" icon="pi pi-upload" severity="help" @click="exportCSV($event)" />
-                    </template>
                 </Toolbar>
                 <DataView :value="datas" :layout="'grid'" :paginator="true" :rows="9">
-
                     <template #grid="slotProps">
                         <div class="grid grid-nogutter">
                             <div v-for="(item, index) in slotProps.items" :key="index" class="col-12 sm:col-6 md:col-4 p-2">
                                 <div class="p-4 border-1 surface-border surface-card border-round flex flex-column">
                                     <div class="surface-50 flex justify-content-center border-round relative">
                                         <div class="relative">
-                                            <img class="border-round w-full" :src="`${sourceUrl()}${item.image}`" :alt="item.model + item.mark" style="max-width: 300px; max-height: 140px;" />
+                                            <img class="border-round w-full" :src="`${sourceUrl()}${item.image}`" :alt="item.model + item.mark" style="max-width: 300px; max-height: 140px" />
                                         </div>
-                                        <Tag :value="status[item.status].name" class="absolute" style="left: 4px; top: 4px"></Tag>
+                                        <Tag v-if="adminRole" :value="status[item.status].name" class="absolute" style="left: 4px; top: 4px"></Tag>
                                     </div>
                                     <div class="pt-4">
                                         <div class="flex flex-row justify-content-between align-items-start gap-2">
                                             <div>
-                                                <div class="text-lg font-medium text-900 mt-1">{{ item.mark + " " + item.model + ", " + item.date }}</div>
+                                                <div class="text-lg font-medium text-900 mt-1">{{ item.mark + ' ' + item.model + ', ' + item.date }}</div>
                                             </div>
                                             <div>
-                                                <Button icon="pi pi-pencil" class="mr-2" severity="success" rounded text @click="editData(item)" />
-                                                <Button icon="pi pi-trash" class="mt-2" severity="danger" rounded text @click="confirmDeleteData(item)" />
+                                                <Button class="p-0 mt-3" @click="addDataServices(item.add_services)" text rounded><Button type="button" text rounded icon="pi pi-info" @click="toggle"></Button></Button>
+                                                <Button v-if="managerRole" icon="pi pi-pencil" class="mr-2" severity="success" rounded text @click="editData(item)" />
+                                                <Button v-if="managerRole" icon="pi pi-trash" class="mt-2" severity="danger" rounded text @click="confirmDeleteData(item)" />
                                             </div>
                                         </div>
                                         <div>
-                                            <ul>
-                                                <li style="list-style-type: none"><b>VIN-номер:</b> {{ item.id }}</li>
-                                                <li style="list-style-type: none"><b>Гос. номер:</b> {{ item.state_number }}</li>
-                                                <li style="list-style-type: none"><b>Класс авто:</b> {{ item.cls_title }}</li>
-                                                <li style="list-style-type: none"><b>Цвет:</b> {{ item.color }}</li>
-                                                <li style="list-style-type: none"><b>Тип кузова:</b> {{ item.body_type }}</li>
-                                                <li style="list-style-type: none"><b>Коробка передач:</b> {{ item.gearbox }}</li>
-                                                <li style="list-style-type: none"><b>Пункт обслуживания:</b> {{ item.station_service }}</li>
-                                            </ul>
+                                            <div v-if="managerRole"><b>VIN-номер:</b> {{ item.id }}</div>
+                                            <div v-if="managerRole"><b>Гос. номер:</b> {{ item.state_number }}</div>
+                                            <div><b>Класс авто:</b> {{ item.cls_title }}</div>
+                                            <div><b>Цвет:</b> {{ item.color }}</div>
+                                            <div><b>Тип кузова:</b> {{ item.body_type }}</div>
+                                            <div><b>Коробка передач:</b> {{ item.gearbox }}</div>
+                                            <div><b>Пункт обслуживания:</b> {{ item.station_service }}</div>
+                                            <Button v-if="clientRole" label="Заказать" class="mt-3" @click="orderForm(item.id)"></Button>
                                         </div>
                                     </div>
                                 </div>
@@ -293,12 +358,21 @@ const checkEdit = () => {
                         </div>
                     </template>
                 </DataView>
+                <OverlayPanel ref="op">
+                    <div>
+                        <ul>
+                            <li v-for="item in addServices">
+                                {{ item }}
+                            </li>
+                        </ul>
+                    </div>
+                </OverlayPanel>
 
                 <!--Диалог изменений-->
                 <Dialog v-model:visible="dataDialog" :style="{ width: '450px' }" header="Информация о автомобиле" :modal="true" class="p-fluid">
                     <div class="field">
                         <label for="mark">Изображение авто</label>
-                        <FileUpload mode="basic" :url="sourceUrl()+'/car/upload'" name="demo[]"  accept="image/*" :maxFileSize="1000000" @upload="onUpload" />
+                        <FileUpload mode="basic" :url="sourceUrl() + '/car/upload'" name="demo[]" accept="image/*" :maxFileSize="1000000" @upload="onUpload" />
                         <small class="p-invalid" v-if="submitted && !data.mark">Марка обязательно.</small>
                     </div>
                     <div class="field">
@@ -338,7 +412,7 @@ const checkEdit = () => {
                     </div>
                     <div class="field">
                         <label for="color">Цвет</label>
-                        <InputText id="color" v-model="data.color" required="true" autofocus :invalid="submitted && !data.color"/>
+                        <InputText id="color" v-model="data.color" required="true" autofocus :invalid="submitted && !data.color" />
                         <small class="p-invalid" v-if="submitted && !data.color">Вы не указали Цвет.</small>
                     </div>
                     <div class="field">
@@ -347,19 +421,24 @@ const checkEdit = () => {
                         <small class="p-invalid" v-if="submitted && !data.status">Вы не указали Статус.</small>
                     </div>
                     <div class="field">
+                        <label for="add_services">Дополнительные опции</label>
+                        <MultiSelect v-model="data.add_services" :options="addServicesArray" placeholder="Дополнительные опции" :maxSelectedLabels="3" class="w-full" />
+                        <small class="p-invalid" v-if="submitted && !data.add_services">Вы не указали Дополнительные опции ВУ.</small>
+                    </div>
+                    <div class="field">
                         <label for="gearbox">Коробка передач</label>
                         <Dropdown v-model="data.gearbox" :options="gearboxes" placeholder="Выберите тип коробки передач" class="w-full md:w-14rem" />
                         <small class="p-invalid" v-if="submitted && !data.gearbox">Вы не указали Коробку передач.</small>
                     </div>
                     <div class="field">
                         <label for="station_service">Пункт обслуживания</label>
-                        <AutoComplete v-model="data.station_service" dropdown :suggestions="filtered_station_service" @complete="search"/>
+                        <AutoComplete v-model="data.station_service" dropdown :suggestions="filtered_station_service" @complete="search" />
                         <small class="p-invalid" v-if="submitted && !data.station_service">Вы не выбрали пункт обслуживания.</small>
                     </div>
 
                     <template #footer>
-                        <Button label="Отмена" icon="pi pi-times" text="" @click="hideDialog" />
-                        <Button label="Сохранить" icon="pi pi-check" text="" @click="saveData" />
+                        <Button v-if="adminRole" label="Отмена" icon="pi pi-times" text="" @click="hideDialog" />
+                        <Button v-if="adminRole" label="Сохранить" icon="pi pi-check" text="" @click="saveData" />
                     </template>
                 </Dialog>
 
@@ -367,7 +446,7 @@ const checkEdit = () => {
                     <div class="flex align-items-center justify-content-center">
                         <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
                         <span
-                            >Вы уверены, что хотите удалить автомобиль <b>{{ data.mark + " " + data.model }}</b
+                            >Вы уверены, что хотите удалить автомобиль <b>{{ data.mark + ' ' + data.model }}</b
                             >?</span
                         >
                     </div>
@@ -376,6 +455,18 @@ const checkEdit = () => {
                         <Button label="Да" icon="pi pi-check" text @click="deleteData" />
                     </template>
                     <template> </template>
+                </Dialog>
+
+                <Dialog v-if="clientRole" v-model:visible="orderDialog" :style="{ width: '450px' }" header="Новый заказ" :modal="true" class="p-fluid">
+                    <div class="field">
+                        <label for="car">Количество дней аренды</label>
+                        <InputNumber v-model="orderData.count_day" inputId="horizontal-buttons" showButtons buttonLayout="horizontal" :step="1"></InputNumber>
+                        <small class="p-invalid" v-if="submitted && !data.count_day">Вы не указали Количество дней аренды.</small>
+                    </div>
+                    <template #footer>
+                        <Button label="Отмена" icon="pi pi-times" text="" @click="hideOrderDialog" />
+                        <Button label="Сохранить" icon="pi pi-check" text="" @click="saveOrder" />
+                    </template>
                 </Dialog>
             </div>
         </div>

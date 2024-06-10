@@ -91,6 +91,7 @@ const dataDialog = ref(false);
 const deleteDataDialog = ref(false);
 const submitted = ref(false);
 let categorys_drv_lic = ref();
+const adminRole = localStorage.getItem('user_role') == 'admin';
 
 const openNew = () => {
     data.value = {};
@@ -214,10 +215,6 @@ const strPhoneToNumber = (el) => {
                             <Button v-if="false" label="Новый" icon="pi pi-plus" class="mr-2" severity="success" @click="openNew" />
                         </div>
                     </template>
-
-                    <template v-slot:end>
-                        <Button label="Excel" icon="pi pi-upload" severity="help" @click="exportCSV($event)" />
-                    </template>
                 </Toolbar>
                 <!--Данные-->
                 <DataTable :value="datas" :rows="10" tableStyle="min-width: 50rem">
@@ -282,8 +279,8 @@ const strPhoneToNumber = (el) => {
                     </Column>
                     <Column headerStyle="min-width:10rem;">
                         <template #body="slotProps">
-                            <Button icon="pi pi-pencil" class="mr-2" severity="success" rounded text @click="editData(slotProps.data)" />
-                            <Button icon="pi pi-trash" class="mt-2" severity="danger" rounded text @click="confirmDeleteData(slotProps.data)" />
+                            <Button v-if="adminRole" icon="pi pi-pencil" class="mr-2" severity="success" rounded text @click="editData(slotProps.data)" />
+                            <Button v-if="adminRole" icon="pi pi-trash" class="mt-2" severity="danger" rounded text @click="confirmDeleteData(slotProps.data)" />
                         </template>
                     </Column>
                 </DataTable>

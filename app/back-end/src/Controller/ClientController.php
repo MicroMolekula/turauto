@@ -132,4 +132,37 @@ class ClientController extends AbstractController
         }
         return $this->json(["error" => "Такого клиента не существует"]);
     }
+
+    #[Route('/{clt_id}/bookings', methods:['GET'])]
+    public function bookings(EntityManagerInterface $manager, int $clt_id)
+    {
+        $client = $manager->getRepository(Client::class)->findOneBy(['clt_id' => $clt_id]);
+        $bookings = $client->getBookings();
+        $response = [];
+        foreach($bookings as $booking){
+            $response[] = [
+                "id" => $booking->getBkgId(),
+                "car" => [
+                    "id" => $booking->getCar()->getCarVin(),
+                    "mark" => $booking->getCar()->getCarMake(),
+                    "model" => $booking->getCar()->getCarModel(),
+                    "date" => $booking->getCar()->getCarDateOfIssue(),
+                    "state_number" => $booking->getCar()->getCarStateNumber(),
+                ],
+                "manager" => [
+                    "id" => $booking->getManager()->getId(),
+                    "surname" => $booking->getManager()->getMngSurname(),
+                    "name" => $booking->getManager()->getMngName(),
+                    "middlename" => $booking->getManager()->getMngMidlename(),
+                    "email" => $booking->getManager()->getMngEmail(),
+                ],
+                "station_service" => $booking->getStationService()->getStnAddress(),
+                "date_begin" => $booking->getBkgDateBegin()->format("Y-m-d H:i:s"),
+                "date_end" => $booking->getBkgDateEnd()->format("Y-m-d H:i:s"),
+                "cost" => $booking->getBkgCost(),
+                "status" => $booking->getBkgStatus(),
+            ];
+        }
+        return $this->json($response);
+    }
 }

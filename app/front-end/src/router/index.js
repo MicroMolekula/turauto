@@ -10,6 +10,10 @@ import AddService from '@/views/admin/AddService.vue';
 import Auth from '@/views/Auth.vue';
 import Main from '@/views/Main.vue';
 import Registration from '@/views/Registration.vue';
+import ReportManagers from '@/views/admin/ReportManagers.vue';
+import ReportClients from '../views/admin/ReportClients.vue';
+import ReportCars from '../views/admin/ReportCars.vue';
+import HistoryBookings from '../views/admin/HistoryBookings.vue';
 
 const router = createRouter({
     history: createWebHistory(),
@@ -52,6 +56,26 @@ const router = createRouter({
                     path: '/add_service',
                     name: 'add_service',
                     component: AddService,
+                },
+                {
+                    path: '/report_managers',
+                    name: 'report_managers',
+                    component: ReportManagers,
+                },
+                {
+                    path: '/report_clients',
+                    name: 'report_clients',
+                    component: ReportClients,
+                },
+                {
+                    path: '/report_cars',
+                    name: 'report_cars',
+                    component: ReportCars,
+                },
+                {
+                    path: '/history',
+                    name: 'history',
+                    component: HistoryBookings,
                 },
             ]
         },

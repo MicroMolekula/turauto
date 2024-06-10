@@ -21,6 +21,19 @@ class CarRepository extends ServiceEntityRepository
         parent::__construct($registry, Car::class);
     }
 
+    public function report()
+    {
+        $entityManager = $this->getEntityManager();
+        $con = $entityManager->getConnection();
+        $sql = "SELECT C.car_vin, C.car_make, C.car_model, COUNT(B.bkg_id), SUM(B.bkg_cost)
+                FROM car C INNER JOIN booking B ON B.car_vin = C.car_vin
+                GROUP BY C.car_vin";
+        $stmt = $con->prepare($sql);
+        $result = $stmt->executeQuery();
+        $cars = $result->fetchAllAssociative();
+        return $cars;
+    }
+
 //    /**
 //     * @return Car[] Returns an array of Car objects
 //     */

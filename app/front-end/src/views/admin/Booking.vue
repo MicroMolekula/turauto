@@ -12,10 +12,6 @@ const filters = ref({});
 function getData() {
     axios.get(sourceUrl() + '/booking/').then(function (response) {
         datas.value = response.data;
-        getClients();
-        getManagers();
-        getCars();
-        getStnServ();
     });
 }
 
@@ -103,8 +99,23 @@ function getStnServ() {
     });
 }
 
+function getBookings(id){
+    axios.get(sourceUrl() + '/manager/' + id + '/bookings')
+    .then((response) => {
+        datas.value = response.data
+    });
+}
+
 onMounted(() => {
-    getData();
+    if(localStorage.getItem('user_role') == 'admin'){
+        getData();
+    } else if(localStorage.getItem('user_role') == 'manager') {
+        getBookings(localStorage.getItem('user_id'));
+    }
+    getClients();
+    getManagers();
+    getCars();
+    getStnServ();
 });
 
 onBeforeMount(() => {
@@ -275,7 +286,7 @@ const strPhoneToNumber = (el) => {
     <div class="grid" v-if="datas !== undefined">
         <div class="col-12">
             <div class="card">
-                <Toolbar class="mb-4" v-if="adminRole">
+                <Toolbar class="mb-4">
                     <template v-slot:start>
                         <div class="my-2">
                             <Button label="Новый" icon="pi pi-plus" class="mr-2" severity="success" @click="openNew" />
@@ -299,12 +310,6 @@ const strPhoneToNumber = (el) => {
                         <template #body="slotProps">
                             <span class="p-column-title">Автомобиль</span>
                             <p v-tooltip.bottom="slotProps.data.car.state_number">{{ `${slotProps.data.car.mark} ${slotProps.data.car.model}, ${slotProps.data.car.date.split('-')[0]}` }}</p>
-                        </template>
-                    </Column>
-                    <Column field="manager" header="Менеджер" :sortable="true">
-                        <template #body="slotProps">
-                            <span class="p-column-title">Менеджер</span>
-                            <p v-tooltip.bottom="slotProps.data.manager.email">{{ `${slotProps.data.manager.surname} ${slotProps.data.manager.name[0]}. ${slotProps.data.manager.middlename[0]}.` }}</p>
                         </template>
                     </Column>
                     <Column field="station_service" header="Пункт обслуживания" :sortable="true">
@@ -337,11 +342,11 @@ const strPhoneToNumber = (el) => {
                             <p>{{ status[slotProps.data.status].name }}</p>
                         </template>
                     </Column>
-                    <Column headerStyle="min-width:10rem;" v-if="adminRole">
+                    <Column headerStyle="min-width:10rem;">
                         <template #body="slotProps" class="flex" style="align-items: end;">
                             <div class="flex" style="align-items: center;">
                                 <Button v-if="slotProps.data.status == 1" icon="pi pi-pencil" class="mr-2" severity="success" rounded text @click="editData(slotProps.data)" />
-                                <Button  icon="pi pi-trash" class="mt-2" severity="danger" rounded text @click="confirmDeleteData(slotProps.data)" />
+                                <Button v-if="adminRole" icon="pi pi-trash" class="mt-2" severity="danger" rounded text @click="confirmDeleteData(slotProps.data)" />
                             </div>
                         </template>
                     </Column>

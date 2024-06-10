@@ -189,10 +189,6 @@ const search = (event) => {
                             <Button label="Новый" icon="pi pi-plus" class="mr-2" severity="success" @click="openNew" />
                         </div>
                     </template>
-
-                    <template v-slot:end>
-                        <Button label="Excel" icon="pi pi-upload" severity="help" @click="exportCSV($event)" />
-                    </template>
                 </Toolbar>
                 <!--Данные-->
                 <DataTable :value="datas" :rows="10" tableStyle="min-width: 50rem">
