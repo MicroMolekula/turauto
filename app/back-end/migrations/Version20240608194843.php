@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20240604155600 extends AbstractMigration
+final class Version20240608194843 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -20,13 +20,12 @@ final class Version20240604155600 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE booking DROP bkg_status');
+        $this->addSql('CREATE SEQUENCE "client_clt_id_seq" START 1;');
     }
 
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
         $this->addSql('CREATE SCHEMA public');
-        $this->addSql('ALTER TABLE booking ADD bkg_status INT NOT NULL');
     }
 }

@@ -1,0 +1,8 @@
+#!/bin/bash
+for ((i = 0; i < 100000; i=i+1))
+do
+echo "Запрос номер - $i"
+curl http://localhost/car >> /dev/null 2>> /dev/null
+done;
+echo "Конец теста";
+exit 0;

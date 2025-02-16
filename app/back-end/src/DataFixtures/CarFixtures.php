@@ -9,6 +9,8 @@ use DateTimeImmutable;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 
+ini_set("memory_limit", 4 * 1024 * 1024);
+
 class CarFixtures extends Fixture
 {
     public function load(ObjectManager $manager): void
@@ -28,7 +30,7 @@ class CarFixtures extends Fixture
             ['Audi', 'A6', '2020-01-01', 'М805ТС48', '16792670650274984', 'E', 'ул. Неделина, 2В', 'Седан', 'Черный', 2, 'РКПП', "/img/cars/a6_black.png"],
             ['Volvo', 'S90', '2021-01-01', 'С803РТ48', '77222665727084389', 'E', 'ул. Московской, 83', 'Седан', 'Белый', 1, 'АКПП', "/img/cars/s90_white.jpg"],
             ['Volkswagen', 'Caravelle Long', '2021-01-01', 'Т371ВТ48', '63192064816322174', 'M', 'ул. Московской, 83', 'Минивэн', 'Черный', 1, 'РКПП', "/img/cars/carav_black.jpg"],
-            ['Jeep', 'Wrangler', '2016-01-01', 'С734МА48', '00461778306695595', 'J', 'ул. Меркулова, 33', 'Внедорожник', 'Черный', 2, 'АКПП', "/img/cars/jeep_black.jpg"]
+            ['Jeep', 'Wrangler', '2016-01-01', 'С734МА48', '00461778306695595', 'J', 'ул. Меркулова, 33', 'Внедорожник', 'Черный', 2, 'АКПП', "/img/cars/jeep_black.jpg"],
         ];
 
         foreach($carArray as $item){
@@ -47,7 +49,6 @@ class CarFixtures extends Fixture
                 ->setCarImg($item[11]);
             $manager->persist($car);
         }
-
         $manager->flush();
     }
 }
