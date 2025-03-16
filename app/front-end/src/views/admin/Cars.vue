@@ -9,14 +9,28 @@ const toast = useToast();
 
 const filters = ref({});
 
-function getData() {
-    axios.get(sourceUrl() + '/car/').then(function (response) {
-        datas.value = response.data;
-        datas.value = datas.value.map((el) => {
-            el.date = el.date.split('-')[0];
-            return el;
+const limit = ref(9);
+const currentPage = ref(0);
+const totalItems = ref(0);
+let datas = ref();
+const dataViewKey = ref(0);
+
+
+function getData(currentPage) {
+    axios.get(sourceUrl() + '/car?page=' + currentPage.toString()).then(function (response) {
+        datas.value = response.data.cars.map((el) => {
+          el.date = el.date.split('-')[0];
+          return el;
         });
+        totalItems.value = response.data.pages.totalItems;
+        dataViewKey.value++;
     });
+}
+
+function onPageChange(event) {
+  currentPage.value = event.page;
+  datas = ref();
+  getData(currentPage.value + 1)
 }
 
 function getCarsFCl() {
@@ -30,31 +44,19 @@ function getCarsFCl() {
 }
 
 function newData(obj) {
-    axios({
+    return axios({
         method: 'post',
         url: sourceUrl() + '/car/new',
         data: obj
     })
-        .then(function (response) {
-            console.log(response.data);
-        })
-        .catch(function (error) {
-            console.log(error);
-        });
 }
 
 function updateData(obj, id) {
-    axios({
+    return axios({
         method: 'put',
         url: sourceUrl() + '/car/' + id + '/edit',
         data: obj
     })
-        .then(function (response) {
-            console.log(response.data);
-        })
-        .catch(function (error) {
-            console.log(error);
-        });
 }
 
 function deleteDataAx(id) {
@@ -122,7 +124,7 @@ onMounted(() => {
         getCarsFCl();
     }
     else {
-        getData();
+        getData(currentPage.value + 1);
     }
     getStnServ();
     getGearboxes();
@@ -135,7 +137,7 @@ onBeforeMount(() => {
     initFilters();
 });
 
-let datas = ref();
+
 let data = ref({});
 const dataDialog = ref(false);
 const deleteDataDialog = ref(false);
@@ -204,28 +206,56 @@ const initFilters = () => {
     };
 };
 
+const validateMark = (mark) => {
+  // Регулярное выражение: хотя бы одна буква и не только цифры
+  const regex = /^(?=.*[a-zA-Zа-яА-Я])[a-zA-Zа-яА-Я0-9\s]+$/;
+  return regex.test(mark);
+};
+
+const validMark = ref(true)
+
 const saveData = () => {
     submitted.value = true;
+
+  if (!validateMark(data.value.mark)) {
+    toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Поле "Марка" должно содержать буквы и может содержать цифры', life: 3000 });
+    validMark.value = false
+    return; // Прерываем выполнение, если валидация не пройдена
+  }
+
     if (data.value.model) {
         if (checkEdit()) {
             console.log(data.value);
             data.value.image = image.value == undefined ? data.value.image : image.value;
             data.value.date = typeof data.value.date === 'object' ? data.value.date.toLocaleDateString().split('.')[2] : data.value.date;
-            datas.value[findIndexById(data.value.id)] = data.value;
+
             let response = Object.assign({}, data.value);
             response.date = response.date + '-01-01';
             console.log(response);
-            updateData(response, response.id);
-            toast.add({ severity: 'success', summary: 'Успешно', detail: 'Данные автомобиля измененны', life: 3000 });
+            updateData(response, response.id)
+                .then((response) => {
+                  datas.value[findIndexById(data.value.id)] = data.value;
+                  toast.add({ severity: 'success', summary: 'Успешно', detail: 'Данные автомобиля измененны', life: 3000 });
+                })
+                .catch((e) => {
+                  toast.add({ severity: 'error', summary: 'Ошибка', detail: 'При изменение данных авомобиля произшла ошибка попробуйте позже', life: 3000 });
+                });
+
         } else {
             data.value.image = image.value;
             data.value.date = typeof data.value.date === 'object' ? data.value.date.toLocaleDateString().split('.')[2] : data.value.date;
-            datas.value.push(data.value);
+
             let response = Object.assign({}, data.value);
             response.date = response.date + '-01-01';
             console.log(response);
-            newData(response);
-            toast.add({ severity: 'success', summary: 'Успешно', detail: 'Автомобиль добавлен', life: 3000 });
+            newData(response)
+                .then((response) => {
+                  datas.value.push(data.value);
+                  toast.add({ severity: 'success', summary: 'Успешно', detail: 'Автомобиль добавлен', life: 3000 });
+                })
+                .catch((e) => {
+                  toast.add({ severity: 'error', summary: 'Ошибка', detail: 'При добовление автомобиля произошла ошибка попробуйте позже', life: 3000 });
+                });
         }
         dataDialog.value = false;
         data.value = {};
@@ -320,7 +350,7 @@ const hideOrderDialog = () =>{
                         </div>
                     </template>
                 </Toolbar>
-                <DataView :value="datas" :layout="'grid'" :paginator="true" :rows="9">
+                <DataView :key="dataViewKey" :pageLinkSize="10" :paginatorPosition="'top'" :value="datas" :layout="'grid'" :paginator="true" :rows="limit" :totalRecords="totalItems" @page="onPageChange">
                     <template #grid="slotProps">
                         <div class="grid grid-nogutter">
                             <div v-for="(item, index) in slotProps.items" :key="index" class="col-12 sm:col-6 md:col-4 p-2">
@@ -350,7 +380,6 @@ const hideOrderDialog = () =>{
                                             <div><b>Тип кузова:</b> {{ item.body_type }}</div>
                                             <div><b>Коробка передач:</b> {{ item.gearbox }}</div>
                                             <div><b>Пункт обслуживания:</b> {{ item.station_service }}</div>
-                                            <div><b>Цена:</b> {{ item.cost +'₽ в сутки' }}</div>
                                             <Button v-if="clientRole" label="Заказать" class="mt-3" @click="orderForm(item.id)"></Button>
                                         </div>
                                     </div>
@@ -380,6 +409,7 @@ const hideOrderDialog = () =>{
                         <label for="mark">Марка</label>
                         <InputText id="mark" v-model.trim="data.mark" required="true" autofocus :invalid="submitted && !data.mark" />
                         <small class="p-invalid" v-if="submitted && !data.mark">Марка обязательно.</small>
+                        <small style="color: red;" class="p-invalid" v-if="submitted && !validMark">Марка не должна содержать только цифры</small>
                     </div>
                     <div class="field">
                         <label for="model">Модель</label>

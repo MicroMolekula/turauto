@@ -3,8 +3,9 @@ services:
   nginx:
     image: nginx:latest
     container_name: nginx
+    hostname: 'app'
     ports:
-      - "80:80"
+      - "8080:80"
     volumes:
       - "./nginx:/etc/nginx/conf.d"
       - "../app/back-end:/var/www/html"
@@ -22,3 +23,12 @@ services:
       - ./pgsql/db.env
     volumes:
       - ../db-data:/var/lib/postgresql/data
+  vue:
+    build:
+      context: ../app/front-end
+      dockerfile: docker/Dockerfile
+    container_name: vue
+    volumes:
+      - "../app/front-end:/var/www/app"
+    ports:
+      - "80:80"

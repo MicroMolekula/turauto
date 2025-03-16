@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Car;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -32,6 +33,13 @@ class CarRepository extends ServiceEntityRepository
         $result = $stmt->executeQuery();
         $cars = $result->fetchAllAssociative();
         return $cars;
+    }
+
+    public function getCarsWithPagination(int $page, int $itemsPerPage): mixed {
+        $queryBuilder = $this->createQueryBuilder('c')
+            ->orderBy('c.car_vin', 'DESC');
+        $queryBuilder->setFirstResult(($page - 1) * $itemsPerPage)->setMaxResults($itemsPerPage);
+        return $queryBuilder->getQuery()->getResult();
     }
 
 //    /**

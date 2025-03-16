@@ -7,6 +7,7 @@ use App\Entity\Car;
 use App\Entity\CarClass;
 use App\Entity\StationService;
 use App\Repository\CarRepository;
+use App\Service\CarsService;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,40 +19,16 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/car')]
 class CarController extends AbstractController
 {
+    public function __construct(
+        private CarsService $carsService,
+    ) {
+    }
+
     #[Route('/', methods: ['GET'])]
-    public function index(CarRepository $carRepository): Response
+    public function index(CarRepository $carRepository, Request $request): Response
     {
-        /*
-        0 - Удалена из каталога
-        1 - В аренде
-        2 - Находится в пункте выдачи
-        3 - На ремонте
-        */
-        $cars = $carRepository->findAll();
-        $carsResponse = [];
-        foreach ($cars as $car) {
-            $addServicesArr = [];
-            $addServices = $car->getAddServices();
-            foreach ($addServices as $addService) {
-                $addServicesArr[] = $addService->getSrvType();
-            }
-            $carsResponse[] = [
-                "id" => $car->getCarVin(),
-                "mark" => $car->getCarMake(),
-                "model" => $car->getCarModel(),
-                "date" => $car->getCarDateOfIssue()->format('Y-m-d'),
-                "state_number" => $car->getCarStateNumber(),
-                "cls_title" => $car->getCarClass()->getClsTitle(),
-                "image" => $car->getCarImg(),
-                "station_service" => $car->getStationService()->getStnAddress(),
-                "body_type" => $car->getCarBodyType(),
-                "color" => $car->getCarColor(),
-                "status" => $car->getCarStatus(),
-                "gearbox" => $car->getCarGearboxType(),
-                "add_services" => $addServicesArr,
-            ];
-        }
-        return $this->json($carsResponse);
+        $page = $request->get('page', 1);
+        return $this->json($this->carsService->getCars($page));
     }
 
     #[Route('/for_client', methods: ['GET'])]
@@ -170,8 +147,11 @@ class CarController extends AbstractController
         $file = $request->files->get('demo')[0];
         if ($file) {
             $filename = $file->getClientOriginalName();
-            $file->move($this->getParameter('upload_directory'), $filename);
-            return $this->json(["path" => "/img/cars/" . "$filename"]);
+            $arrFilename = explode('.', $filename);
+            $randomIndex = (string)random_int(1, 1000);
+            $newFilename = hash('sha256', $filename . $randomIndex) . '.' . $arrFilename[count($arrFilename)-1];
+            $file->move($this->getParameter('upload_directory'), $newFilename);
+            return $this->json(["path" => "/img/cars/" . $newFilename]);
         }
         return $this->json(["er" => $file]);
     }

@@ -9,7 +9,6 @@ use DateTimeImmutable;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 
-ini_set("memory_limit", 4 * 1024 * 1024);
 
 class CarFixtures extends Fixture
 {
